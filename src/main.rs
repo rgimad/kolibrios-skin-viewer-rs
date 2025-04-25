@@ -1,6 +1,7 @@
 use std::env;
 use std::os::windows::process;
 use std::path::Path;
+use std::io::Cursor;
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::fs::File;
 use std::io::Read;
@@ -16,7 +17,16 @@ struct Skin {
     params: u32,
     buttons: u32,
     bitmaps: u32,
+    margin: SkinMargin,
     // TODO ....
+}
+
+#[derive(Debug)]
+struct SkinMargin {
+    right: u16,
+    left: u16,
+    bottom: u16,
+    top: u16,
 }
 
 fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
@@ -26,29 +36,46 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
 
     let mut skin_data = &buffer[..];
 
+    let mut cursor1 = Cursor::new(skin_data);
+
     // TODO add kpacked files processing
     // let magic = skin_data.read_u32::<LittleEndian>()?;
     // if magic == KPACK_MAGIC {
     //     skin_data = &unpack(skin_data)?;
     // }
 
-    let magic = skin_data.read_u32::<LittleEndian>()?;
+    let magic = cursor1.read_u32::<LittleEndian>()?;
     if magic != SKIN_MAGIC {
         return Err("The uploaded file is not a skin!".into());
     }
 
-    let version = skin_data.read_u32::<LittleEndian>()?;
-    let params = skin_data.read_u32::<LittleEndian>()?;
-    let buttons = skin_data.read_u32::<LittleEndian>()?;
-    let bitmaps = skin_data.read_u32::<LittleEndian>()?;
+    let version = cursor1.read_u32::<LittleEndian>()?;
+    let params = cursor1.read_u32::<LittleEndian>()?;
+    let buttons = cursor1.read_u32::<LittleEndian>()?;
+    let bitmaps = cursor1.read_u32::<LittleEndian>()?;
+
+    println!("{}", params as usize + 4);
+
+    let mut cursor2 = Cursor::new(&skin_data[params as usize + 4..]);
+
+    let margin_right = cursor2.read_u16::<LittleEndian>()?;
+    let margin_left = cursor2.read_u16::<LittleEndian>()?;
+    let margin_bottom = cursor2.read_u16::<LittleEndian>()?;
+    let margin_top = cursor2.read_u16::<LittleEndian>()?;
 
     // TODO parse further
 
     Ok(Skin {
-        version,
-        params,
-        buttons,
-        bitmaps,
+        version: version,
+        params: params,
+        buttons: buttons,
+        bitmaps: bitmaps,
+        margin: SkinMargin {
+            right: margin_right,
+            left: margin_left,
+            bottom: margin_bottom,
+            top: margin_top
+        },
     })
 }
 
