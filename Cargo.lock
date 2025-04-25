@@ -134,6 +134,7 @@ dependencies = [
 name = "kolibrios-skin-viewer-rs"
 version = "0.1.0"
 dependencies = [
+ "byteorder",
  "macroquad",
 ]
 
