@@ -18,8 +18,9 @@ struct Skin {
     buttons: u32,
     bitmaps: u32,
     margin: SkinMargin,
-    active: SkinFrameColor,
-    inactive: SkinFrameColor,
+    active: SkinFrameColors,
+    inactive: SkinFrameColors,
+    system_colors: SkinSystemColors,
     // TODO ....
 }
 
@@ -32,10 +33,24 @@ struct SkinMargin {
 }
 
 #[derive(Debug)]
-struct SkinFrameColor {
+struct SkinFrameColors {
     inner: u32,
     outer: u32,
     frame: u32,
+}
+
+#[derive(Debug)]
+struct SkinSystemColors {
+    taskbar: u32,
+    taskbar_text: u32,
+    work_dark: u32,
+    work_light: u32,
+    window_title: u32,
+    work: u32,
+    work_button: u32,
+    work_button_text: u32,
+    work_text: u32,
+    work_graph: u32,
 }
 
 fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
@@ -43,7 +58,7 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
 
-    let mut skin_data = &buffer[..];
+    let skin_data = &buffer[..];
 
     let mut cursor1 = Cursor::new(skin_data);
 
@@ -63,7 +78,7 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let buttons = cursor1.read_u32::<LittleEndian>()?;
     let bitmaps = cursor1.read_u32::<LittleEndian>()?;
 
-    println!("{}", params as usize + 4);
+    // println!("params = {}", params as usize + 4);
 
     let mut cursor2 = Cursor::new(&skin_data[params as usize + 4..]);
 
@@ -80,6 +95,19 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let inactive_outer = cursor2.read_u32::<LittleEndian>()?;
     let inactive_frame = cursor2.read_u32::<LittleEndian>()?;
 
+    let _dtp_size = cursor2.read_u32::<LittleEndian>()?;
+    println!("_dtp_size = {}", _dtp_size);
+    let sc_taskbar = cursor2.read_u32::<LittleEndian>()?;
+    let sc_taskbar_text = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work_dark  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work_light  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_window_title  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work_button  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work_button_text  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work_text  = cursor2.read_u32::<LittleEndian>()?;
+    let sc_work_graph  = cursor2.read_u32::<LittleEndian>()?;
+
     // TODO parse further
 
     Ok(Skin {
@@ -93,17 +121,28 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
             bottom: margin_bottom,
             top: margin_top,
         },
-        active: SkinFrameColor {
+        active: SkinFrameColors {
             inner: active_inner,
             outer: active_outer,
             frame: active_frame,
         },
-        inactive: SkinFrameColor {
+        inactive: SkinFrameColors {
             inner: inactive_inner,
             outer: inactive_outer,
             frame: inactive_frame,
         },
-
+        system_colors: SkinSystemColors {
+            taskbar: sc_taskbar,
+            taskbar_text: sc_taskbar_text,
+            work_dark: sc_work_dark,
+            work_light: sc_work_light,
+            window_title: sc_window_title,
+            work: sc_work,
+            work_button: sc_work_button,
+            work_button_text: sc_work_button_text,
+            work_text: sc_work_text,
+            work_graph: sc_work_graph,
+        },
     })
 }
 
@@ -131,7 +170,7 @@ fn main() {
         }
     };
 
-    println!("skin_obj = {:#?} ", skin_obj);
+    println!("skin_obj = {:#X?} ", skin_obj);
 
 
     // loop {
