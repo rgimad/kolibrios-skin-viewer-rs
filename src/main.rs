@@ -18,6 +18,8 @@ struct Skin {
     buttons: u32,
     bitmaps: u32,
     margin: SkinMargin,
+    active: SkinFrameColor,
+    inactive: SkinFrameColor,
     // TODO ....
 }
 
@@ -27,6 +29,13 @@ struct SkinMargin {
     left: u16,
     bottom: u16,
     top: u16,
+}
+
+#[derive(Debug)]
+struct SkinFrameColor {
+    inner: u32,
+    outer: u32,
+    frame: u32,
 }
 
 fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
@@ -63,6 +72,14 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let margin_bottom = cursor2.read_u16::<LittleEndian>()?;
     let margin_top = cursor2.read_u16::<LittleEndian>()?;
 
+    let active_inner = cursor2.read_u32::<LittleEndian>()?;
+    let active_outer = cursor2.read_u32::<LittleEndian>()?;
+    let active_frame = cursor2.read_u32::<LittleEndian>()?;
+
+    let inactive_inner = cursor2.read_u32::<LittleEndian>()?;
+    let inactive_outer = cursor2.read_u32::<LittleEndian>()?;
+    let inactive_frame = cursor2.read_u32::<LittleEndian>()?;
+
     // TODO parse further
 
     Ok(Skin {
@@ -74,8 +91,19 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
             right: margin_right,
             left: margin_left,
             bottom: margin_bottom,
-            top: margin_top
+            top: margin_top,
         },
+        active: SkinFrameColor {
+            inner: active_inner,
+            outer: active_outer,
+            frame: active_frame,
+        },
+        inactive: SkinFrameColor {
+            inner: inactive_inner,
+            outer: inactive_outer,
+            frame: inactive_frame,
+        },
+
     })
 }
 
