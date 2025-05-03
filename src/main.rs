@@ -156,18 +156,6 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
         let bmp_height = cursor_bmp.read_u32::<LittleEndian>()?;
         // let bmp_size = bmp_width*bmp_height*3;
         
-        // let mut bmp_data = vec![0; bmp_width as usize*bmp_height as usize*4];
-        // for _y in 0..bmp_height as usize {
-        //     for _x in 0..bmp_width as usize {
-        //         let bb = cursor_bmp.read_u8()?;
-        //         let gg = cursor_bmp.read_u8()?;
-        //         let rr = cursor_bmp.read_u8()?;
-        //         bmp_data.push(rr);
-        //         bmp_data.push(gg);
-        //         bmp_data.push(bb);
-        //         bmp_data.push(255);
-        //     }
-        // }
         let mut bmp_data = vec![];
         for _ in 0..bmp_height as usize * bmp_width as usize {
             let bb = cursor_bmp.read_u8()?;
