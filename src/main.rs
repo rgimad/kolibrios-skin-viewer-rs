@@ -6,7 +6,7 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use std::fs::File;
 use std::io::Read;
 use std::error::Error;
-// use macroquad::prelude::*;
+use macroquad::prelude::*;
 
 const SKIN_MAGIC: u32  = 0x4E494B53; // 'SKIN'
 const KPACK_MAGIC: u32 = 0x4B43504B; // 'KPACK'
@@ -161,10 +161,7 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
             let bb = cursor_bmp.read_u8()?;
             let gg = cursor_bmp.read_u8()?;
             let rr = cursor_bmp.read_u8()?;
-            bmp_data.push(rr);
-            bmp_data.push(gg);
-            bmp_data.push(bb);
-            bmp_data.push(255);
+            bmp_data.extend([rr, gg, bb, 255]);
         }
         bmps.push(SkinBitmap { kind: bmp_kind, bmptype: bmp_type, width: bmp_width, height: bmp_height, data: bmp_data });
     }
@@ -207,7 +204,7 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
 }
 
 
-// #[macroquad::main("KolibriOS skin viewer")] async
+#[macroquad::main("KolibriOS skin viewer")] async
 fn main() {
     let args: Vec<String> = env::args().collect();
 
@@ -231,9 +228,21 @@ fn main() {
     };
 
     // println!("skin_obj = {:#X?} ", skin_obj);
-    println!("skin_obj = {:X?} ", skin_obj);
+    //println!("skin_obj = {:X?} ", skin_obj);
 
     println!("len(bmps) = {}", skin_obj.bitmaps.len());
+
+    // Create a Texture2D from the byte data
+    let texture = Texture2D::from_rgba8(skin_obj.bitmaps[2].width as u16, skin_obj.bitmaps[2].height as u16, &skin_obj.bitmaps[2].data);
+
+    loop {
+        clear_background(BLACK);
+
+        // Draw the texture
+        draw_texture(&texture, 0.0, 0.0, WHITE);
+
+        next_frame().await
+    }
 
 
     // loop {
