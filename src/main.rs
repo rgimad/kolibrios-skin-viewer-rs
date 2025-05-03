@@ -141,11 +141,6 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
         let btn_width = cursor_buttons.read_u16::<LittleEndian>()?;
         let btn_height = cursor_buttons.read_u16::<LittleEndian>()?;
         btns.push(SkinButton{btntype: btn_type, left: btn_left, top: btn_top, width: btn_width, height: btn_height});
-
-        // skip the next 12 bytes
-        let _ = cursor_buttons.read_u32::<LittleEndian>()?;
-        let _ = cursor_buttons.read_u32::<LittleEndian>()?;
-        let _ = cursor_buttons.read_u32::<LittleEndian>()?;
     }
 
 
