@@ -143,30 +143,40 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let mut bmps = vec![];
     let mut cursor_bitmaps = Cursor::new(&skin_data[bitmaps_base as usize..]);
     loop {
-        let word1 = cursor_buttons.read_u16::<LittleEndian>()?;
-        let word2 = cursor_buttons.read_u16::<LittleEndian>()?;
+        let word1 = cursor_bitmaps.read_u16::<LittleEndian>()?;
+        let word2 = cursor_bitmaps.read_u16::<LittleEndian>()?;
         if word1 == 0 && word2 == 0 {
             break;
         }
         let bmp_kind = word1;
         let bmp_type = word2;
-        let posbm = cursor_buttons.read_u32::<LittleEndian>()?;
+        let posbm = cursor_bitmaps.read_u32::<LittleEndian>()?;
         let mut cursor_bmp = Cursor::new(&skin_data[posbm as usize..]);
         let bmp_width = cursor_bmp.read_u32::<LittleEndian>()?;
         let bmp_height = cursor_bmp.read_u32::<LittleEndian>()?;
-        let bmp_size = bmp_width*bmp_height*3;
+        // let bmp_size = bmp_width*bmp_height*3;
         
-        let mut bmp_data = vec![0; bmp_width as usize*bmp_height as usize*4];
-        for y in 0..bmp_height as usize {
-            for x in 0..bmp_width as usize {
-                let bb = cursor_bmp.read_u8()?;
-                let gg = cursor_bmp.read_u8()?;
-                let rr = cursor_bmp.read_u8()?;
-                bmp_data.push(rr);
-                bmp_data.push(gg);
-                bmp_data.push(bb);
-                bmp_data.push(255);
-            }
+        // let mut bmp_data = vec![0; bmp_width as usize*bmp_height as usize*4];
+        // for _y in 0..bmp_height as usize {
+        //     for _x in 0..bmp_width as usize {
+        //         let bb = cursor_bmp.read_u8()?;
+        //         let gg = cursor_bmp.read_u8()?;
+        //         let rr = cursor_bmp.read_u8()?;
+        //         bmp_data.push(rr);
+        //         bmp_data.push(gg);
+        //         bmp_data.push(bb);
+        //         bmp_data.push(255);
+        //     }
+        // }
+        let mut bmp_data = vec![];
+        for _ in 0..bmp_height as usize * bmp_width as usize {
+            let bb = cursor_bmp.read_u8()?;
+            let gg = cursor_bmp.read_u8()?;
+            let rr = cursor_bmp.read_u8()?;
+            bmp_data.push(rr);
+            bmp_data.push(gg);
+            bmp_data.push(bb);
+            bmp_data.push(255);
         }
         bmps.push(SkinBitmap { kind: bmp_kind, bmptype: bmp_type, width: bmp_width, height: bmp_height, data: bmp_data });
     }
