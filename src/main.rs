@@ -19,6 +19,7 @@ struct Skin {
     inactive: SkinFrameColors,
     system_colors: SkinSystemColors,
     buttons: Vec<SkinButton>,
+    bitmaps: Vec<SkinBitmap>,
     // TODO ....
 }
 
@@ -58,6 +59,15 @@ struct SkinButton {
     top: u16,
     width: u16,
     height: u16,
+}
+
+#[derive(Debug)]
+struct SkinBitmap {
+    kind: u16,
+    bmptype: u16,
+    width: u32,
+    height: u32,
+    data: Vec<u8>,
 }
 
 fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
@@ -115,19 +125,6 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let sc_work_text  = cursor2.read_u32::<LittleEndian>()?;
     let sc_work_graph  = cursor2.read_u32::<LittleEndian>()?;
 
-    // skinObj.button = [];
-    // let pos = buttons;
-    // while (skinData.getUint32(pos, true) != 0) {
-    //     let btn = new Object();
-    //     btn.type = skinData.getUint32(pos, true);
-    //     btn.left = skinData.getInt16(pos + 4, true);
-    //     btn.top = skinData.getInt16(pos + 6, true);
-    //     btn.width = skinData.getUint16(pos + 8, true);
-    //     btn.height = skinData.getUint16(pos + 10, true);
-    //     skinObj.button.push(btn);
-    //     pos += 12;
-    // }
-
     let mut btns = vec![];
     let mut cursor_buttons = Cursor::new(&skin_data[buttons_base as usize..]);
     loop {
@@ -143,6 +140,36 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
         btns.push(SkinButton{btntype: btn_type, left: btn_left, top: btn_top, width: btn_width, height: btn_height});
     }
 
+    let mut bmps = vec![];
+    let mut cursor_bitmaps = Cursor::new(&skin_data[bitmaps_base as usize..]);
+    loop {
+        let word1 = cursor_buttons.read_u16::<LittleEndian>()?;
+        let word2 = cursor_buttons.read_u16::<LittleEndian>()?;
+        if word1 == 0 && word2 == 0 {
+            break;
+        }
+        let bmp_kind = word1;
+        let bmp_type = word2;
+        let posbm = cursor_buttons.read_u32::<LittleEndian>()?;
+        let mut cursor_bmp = Cursor::new(&skin_data[posbm as usize..]);
+        let bmp_width = cursor_bmp.read_u32::<LittleEndian>()?;
+        let bmp_height = cursor_bmp.read_u32::<LittleEndian>()?;
+        let bmp_size = bmp_width*bmp_height*3;
+        
+        let mut bmp_data = vec![0; bmp_width as usize*bmp_height as usize*4];
+        for y in 0..bmp_height as usize {
+            for x in 0..bmp_width as usize {
+                let bb = cursor_bmp.read_u8()?;
+                let gg = cursor_bmp.read_u8()?;
+                let rr = cursor_bmp.read_u8()?;
+                bmp_data.push(rr);
+                bmp_data.push(gg);
+                bmp_data.push(bb);
+                bmp_data.push(255);
+            }
+        }
+        bmps.push(SkinBitmap { kind: bmp_kind, bmptype: bmp_type, width: bmp_width, height: bmp_height, data: bmp_data });
+    }
 
     // TODO parse further
 
@@ -177,6 +204,7 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
             work_graph: sc_work_graph,
         },
         buttons: btns,
+        bitmaps: bmps,
     })
 }
 
@@ -204,7 +232,10 @@ fn main() {
         }
     };
 
-    println!("skin_obj = {:#X?} ", skin_obj);
+    // println!("skin_obj = {:#X?} ", skin_obj);
+    println!("skin_obj = {:X?} ", skin_obj);
+
+    println!("len(bmps) = {}", skin_obj.bitmaps.len());
 
 
     // loop {
