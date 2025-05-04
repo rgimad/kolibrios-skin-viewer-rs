@@ -236,21 +236,35 @@ async fn main() {
 
     println!("{} {}", screen_width(), screen_height());
 
-    let texture = Texture2D::from_rgba8(skin_obj.bitmaps[2].width as u16, skin_obj.bitmaps[2].height as u16, &skin_obj.bitmaps[2].data);
+    
 
     let wx = 50.;
     let wy = 50.;
     let ww = 300.;
     let wh = 280.;
 
+    // let texture = Texture2D::from_rgba8(skin_obj.bitmaps[2].width as u16, skin_obj.bitmaps[2].height as u16, &skin_obj.bitmaps[2].data);
+
+    let mut active_texture_buttons: Option<Texture2D> = None;
+    let mut inactive_texture_buttons: Option<Texture2D> = None;
+    for bmp in &skin_obj.bitmaps {
+        let texture = Some(Texture2D::from_rgba8(bmp.width as u16, bmp.height as u16, &bmp.data));
+        if bmp.kind == 2 {
+            if bmp.bmptype == 1 {
+                active_texture_buttons = texture;
+            } else {
+                inactive_texture_buttons = texture;
+            }
+        }
+    }
+
     loop {
         clear_background(WHITE);
-
         
         draw_rectangle(wx - 1., wy - 1., ww + 2., wh + 2., Color::from_hex(skin_obj.active.outer));
-        draw_rectangle(wx, wy, ww, wh, Color::from_hex(skin_obj.active.frame));
+        draw_rectangle(wx, wy,  ww, wh, Color::from_hex(skin_obj.active.frame));
 
-        draw_texture(&texture, 0.0, 0.0, WHITE);
+        draw_texture(&active_texture_buttons.as_ref().unwrap(), wx + ww - active_texture_buttons.as_ref().unwrap().width() + 1., wy - 1., WHITE);
 
         next_frame().await
     }
