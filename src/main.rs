@@ -3,6 +3,7 @@ use std::os::windows::process;
 use std::path::Path;
 use std::io::Cursor;
 use byteorder::{LittleEndian, ReadBytesExt};
+use macroquad::miniquad::window::screen_size;
 use std::fs::File;
 use std::io::Read;
 use std::error::Error;
@@ -204,8 +205,9 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
 }
 
 
-#[macroquad::main("KolibriOS skin viewer")] async
-fn main() {
+#[macroquad::main("KolibriOS skin viewer")]
+async fn main() {
+    // request_new_screen_size(300.0, 100.0);
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
@@ -232,13 +234,22 @@ fn main() {
 
     println!("len(bmps) = {}", skin_obj.bitmaps.len());
 
-    // Create a Texture2D from the byte data
+    println!("{} {}", screen_width(), screen_height());
+
     let texture = Texture2D::from_rgba8(skin_obj.bitmaps[2].width as u16, skin_obj.bitmaps[2].height as u16, &skin_obj.bitmaps[2].data);
 
-    loop {
-        clear_background(BLACK);
+    let wx = 50.;
+    let wy = 50.;
+    let ww = 300.;
+    let wh = 280.;
 
-        // Draw the texture
+    loop {
+        clear_background(WHITE);
+
+        
+        draw_rectangle(wx - 1., wy - 1., ww + 2., wh + 2., Color::from_hex(skin_obj.active.outer));
+        draw_rectangle(wx, wy, ww, wh, Color::from_hex(skin_obj.active.frame));
+
         draw_texture(&texture, 0.0, 0.0, WHITE);
 
         next_frame().await
