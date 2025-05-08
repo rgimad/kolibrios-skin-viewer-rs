@@ -278,15 +278,24 @@ async fn main() {
     let mut active_texture_buttons: Option<Texture2D> = None;
     let mut active_texture_panel: Option<Texture2D> = None;
     let mut active_bmp_panel: Option<&SkinBitmap> = None;
+    let mut active_texture_left: Option<Texture2D> = None;
 
     let mut inactive_texture_buttons: Option<Texture2D> = None;
     let mut inactive_texture_panel: Option<Texture2D> = None;
     let mut inactive_bmp_panel: Option<&SkinBitmap> = None;
+    let mut inactive_texture_left: Option<Texture2D> = None;
 
     for bmp in &skin_obj.bitmaps {
+        let texture = Some(Texture2D::from_rgba8(bmp.width as u16, bmp.height as u16, &bmp.data));
         match bmp.kind {
+            1 => {
+                if bmp.bmptype == 1 {
+                    active_texture_left = texture;
+                } else {
+                    inactive_texture_left = texture;
+                }
+            }
             2 => {
-                let texture = Some(Texture2D::from_rgba8(bmp.width as u16, bmp.height as u16, &bmp.data));
                 if bmp.bmptype == 1 {
                     active_texture_buttons = texture;
                 } else {
@@ -306,7 +315,7 @@ async fn main() {
         }
     }
 
-    let panel_width = active_bmp_panel.unwrap().width as usize*(ww as usize - active_texture_buttons.as_ref().unwrap().width() as usize);
+    let panel_width = active_bmp_panel.unwrap().width as usize*(ww as usize - active_texture_buttons.as_ref().unwrap().width() as usize - active_texture_left.as_ref().unwrap().width() as usize);
     let rep = dup_image_horiz(&active_bmp_panel.unwrap().data, active_bmp_panel.unwrap().width as usize, active_bmp_panel.unwrap().height as usize, panel_width);
     let active_texture_panel = Some(Texture2D::from_rgba8(panel_width as u16, active_bmp_panel.unwrap().height as u16, &rep));
     let rep = dup_image_horiz(&inactive_bmp_panel.unwrap().data, inactive_bmp_panel.unwrap().width as usize, inactive_bmp_panel.unwrap().height as usize, panel_width);
@@ -321,7 +330,9 @@ async fn main() {
 
         draw_texture(&active_texture_buttons.as_ref().unwrap(), wx + ww - active_texture_buttons.as_ref().unwrap().width() + 1., wy - 1., WHITE);
 
-        draw_texture(&active_texture_panel.as_ref().unwrap(), wx + 1., wy - 1., WHITE);
+        draw_texture(&active_texture_panel.as_ref().unwrap(), wx + active_texture_left.as_ref().unwrap().width() + 1., wy - 1., WHITE);
+
+        draw_texture(&active_texture_left.as_ref().unwrap(), wx + 1., wy - 1., WHITE);
 
         next_frame().await;
 
