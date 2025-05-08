@@ -328,11 +328,13 @@ async fn main() {
         draw_rectangle(wx - 1., wy - 1., ww + 2., wh + 2., Color::from_hex(skin_obj.active.outer));
         draw_rectangle(wx, wy,  ww, wh, Color::from_hex(skin_obj.active.frame));
 
-        draw_texture(&active_texture_buttons.as_ref().unwrap(), wx + ww - active_texture_buttons.as_ref().unwrap().width() + 1., wy - 1., WHITE);
-
-        draw_texture(&active_texture_panel.as_ref().unwrap(), wx + active_texture_left.as_ref().unwrap().width() + 1., wy - 1., WHITE);
-
-        draw_texture(&active_texture_left.as_ref().unwrap(), wx + 1., wy - 1., WHITE);
+        let buttons_x = wx + ww - active_texture_buttons.as_ref().unwrap().width();
+        let buttons_y = wy - 1.;
+        draw_texture(&active_texture_buttons.as_ref().unwrap(), buttons_x, buttons_y, WHITE);
+        let panel_x = wx + active_texture_left.as_ref().unwrap().width();
+        draw_texture(&active_texture_panel.as_ref().unwrap(), panel_x, buttons_y, WHITE);
+        let left_x = wx;
+        draw_texture(&active_texture_left.as_ref().unwrap(), left_x, buttons_y, WHITE);
 
         next_frame().await;
 
