@@ -273,6 +273,11 @@ async fn main() {
     let ww = 300.;
     let wh = 280.;
 
+    let inwx = 50. + 25. + ww;
+    let inwy = 50.;
+    let inww = 300.;
+    let inwh = 280.;
+
     // let texture = Texture2D::from_rgba8(skin_obj.bitmaps[2].width as u16, skin_obj.bitmaps[2].height as u16, &skin_obj.bitmaps[2].data);
 
     let mut active_texture_buttons: Option<Texture2D> = None;
@@ -327,7 +332,6 @@ async fn main() {
         
         draw_rectangle(wx - 1., wy - 1., ww + 2., wh + 2., Color::from_hex(skin_obj.active.outer));
         draw_rectangle(wx, wy,  ww, wh, Color::from_hex(skin_obj.active.frame));
-
         let buttons_x = wx + ww - active_texture_buttons.as_ref().unwrap().width();
         let buttons_y = wy - 1.;
         draw_texture(&active_texture_buttons.as_ref().unwrap(), buttons_x, buttons_y, WHITE);
@@ -335,6 +339,17 @@ async fn main() {
         draw_texture(&active_texture_panel.as_ref().unwrap(), panel_x, buttons_y, WHITE);
         let left_x = wx;
         draw_texture(&active_texture_left.as_ref().unwrap(), left_x, buttons_y, WHITE);
+
+        // draw inactive:
+        draw_rectangle(inwx - 1., inwy - 1., inww + 2., inwh + 2., Color::from_hex(skin_obj.inactive.outer));
+        draw_rectangle(inwx, inwy,  inww, inwh, Color::from_hex(skin_obj.inactive.frame));
+        let buttons_x = inwx + inww - inactive_texture_buttons.as_ref().unwrap().width();
+        let buttons_y = inwy - 1.;
+        draw_texture(&inactive_texture_buttons.as_ref().unwrap(), buttons_x, buttons_y, WHITE);
+        let panel_x = inwx + inactive_texture_left.as_ref().unwrap().width();
+        draw_texture(&inactive_texture_panel.as_ref().unwrap(), panel_x, buttons_y, WHITE);
+        let left_x = inwx;
+        draw_texture(&inactive_texture_left.as_ref().unwrap(), left_x, buttons_y, WHITE);
 
         next_frame().await;
 
