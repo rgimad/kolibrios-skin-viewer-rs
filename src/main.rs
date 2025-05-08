@@ -320,7 +320,7 @@ async fn main() {
         }
     }
 
-    let panel_width = active_bmp_panel.unwrap().width as usize*(ww as usize - active_texture_buttons.as_ref().unwrap().width() as usize - active_texture_left.as_ref().unwrap().width() as usize);
+    let panel_width = active_bmp_panel.unwrap().width as usize*(ww as usize - active_texture_buttons.as_ref().unwrap().width() as usize - active_texture_left.as_ref().unwrap().width() as usize) + 2;
     let rep = dup_image_horiz(&active_bmp_panel.unwrap().data, active_bmp_panel.unwrap().width as usize, active_bmp_panel.unwrap().height as usize, panel_width);
     let active_texture_panel = Some(Texture2D::from_rgba8(panel_width as u16, active_bmp_panel.unwrap().height as u16, &rep));
     let rep = dup_image_horiz(&inactive_bmp_panel.unwrap().data, inactive_bmp_panel.unwrap().width as usize, inactive_bmp_panel.unwrap().height as usize, panel_width);
@@ -332,23 +332,23 @@ async fn main() {
         
         draw_rectangle(wx - 1., wy - 1., ww + 2., wh + 2., Color::from_hex(skin_obj.active.outer));
         draw_rectangle(wx, wy,  ww, wh, Color::from_hex(skin_obj.active.frame));
-        let buttons_x = wx + ww - active_texture_buttons.as_ref().unwrap().width();
+        let buttons_x = wx + ww - active_texture_buttons.as_ref().unwrap().width() + 1.;
         let buttons_y = wy - 1.;
         draw_texture(&active_texture_buttons.as_ref().unwrap(), buttons_x, buttons_y, WHITE);
-        let panel_x = wx + active_texture_left.as_ref().unwrap().width();
+        let panel_x = wx + active_texture_left.as_ref().unwrap().width() - 1.;
         draw_texture(&active_texture_panel.as_ref().unwrap(), panel_x, buttons_y, WHITE);
-        let left_x = wx;
+        let left_x = wx - 1.;
         draw_texture(&active_texture_left.as_ref().unwrap(), left_x, buttons_y, WHITE);
 
         // draw inactive:
         draw_rectangle(inwx - 1., inwy - 1., inww + 2., inwh + 2., Color::from_hex(skin_obj.inactive.outer));
         draw_rectangle(inwx, inwy,  inww, inwh, Color::from_hex(skin_obj.inactive.frame));
-        let buttons_x = inwx + inww - inactive_texture_buttons.as_ref().unwrap().width();
+        let buttons_x = inwx + inww - inactive_texture_buttons.as_ref().unwrap().width() + 1.;
         let buttons_y = inwy - 1.;
         draw_texture(&inactive_texture_buttons.as_ref().unwrap(), buttons_x, buttons_y, WHITE);
-        let panel_x = inwx + inactive_texture_left.as_ref().unwrap().width();
+        let panel_x = inwx + inactive_texture_left.as_ref().unwrap().width() - 1.;
         draw_texture(&inactive_texture_panel.as_ref().unwrap(), panel_x, buttons_y, WHITE);
-        let left_x = inwx;
+        let left_x = inwx - 1.;
         draw_texture(&inactive_texture_left.as_ref().unwrap(), left_x, buttons_y, WHITE);
 
         next_frame().await;
