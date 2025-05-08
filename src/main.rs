@@ -2,6 +2,7 @@ use std::env;
 use std::os::windows::process;
 use std::path::Path;
 use std::io::Cursor;
+use std::time::Duration;
 use byteorder::{LittleEndian, ReadBytesExt};
 use macroquad::miniquad::window::screen_size;
 use std::fs::File;
@@ -205,6 +206,35 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
 }
 
 
+fn dup_image_horiz(data: &[u8], width: usize, height: usize, target_width: usize) -> Vec<u8> {
+    if data.len() != width * height * 4 {
+        panic!("Input data size does not match width and height.");
+    }
+    if width == 0 || height == 0 || target_width == 0 {
+        panic!("Width, height, and target_width must be greater than zero.");
+    }
+
+    let mut result = Vec::with_capacity(target_width * height * 4);
+
+    for row in 0..height {
+        for col in 0..target_width {
+            let source_col = col % width; // Calculate the column in the original image
+
+            // Calculate the index in the original image
+            let source_index = (row * width + source_col) * 4;
+
+            // Copy the RGBA values from the original image to the new image
+            result.push(data[source_index]);     // R
+            result.push(data[source_index + 1]); // G
+            result.push(data[source_index + 2]); // B
+            result.push(data[source_index + 3]); // A
+        }
+    }
+
+    result
+}
+
+
 #[macroquad::main("KolibriOS skin viewer")]
 async fn main() {
     // request_new_screen_size(300.0, 100.0);
@@ -246,15 +276,35 @@ async fn main() {
     // let texture = Texture2D::from_rgba8(skin_obj.bitmaps[2].width as u16, skin_obj.bitmaps[2].height as u16, &skin_obj.bitmaps[2].data);
 
     let mut active_texture_buttons: Option<Texture2D> = None;
+    let mut active_texture_panel: Option<Texture2D> = None;
+
     let mut inactive_texture_buttons: Option<Texture2D> = None;
+    let mut inactive_texture_panel: Option<Texture2D> = None;
+
     for bmp in &skin_obj.bitmaps {
-        let texture = Some(Texture2D::from_rgba8(bmp.width as u16, bmp.height as u16, &bmp.data));
-        if bmp.kind == 2 {
-            if bmp.bmptype == 1 {
-                active_texture_buttons = texture;
-            } else {
-                inactive_texture_buttons = texture;
+        match bmp.kind {
+            2 => {
+                let texture = Some(Texture2D::from_rgba8(bmp.width as u16, bmp.height as u16, &bmp.data));
+                if bmp.bmptype == 1 {
+                    active_texture_buttons = texture;
+                } else {
+                    inactive_texture_buttons = texture;
+                }
             }
+            3 => {
+                let new_width = bmp.width as usize*ww as usize;
+                let duped = dup_image_horiz(&bmp.data, bmp.width as usize, bmp.height as usize, new_width);
+                let texture = Some(Texture2D::from_rgba8(new_width as u16, bmp.height as u16, &duped));
+                if bmp.bmptype == 1 {
+                    active_texture_panel = texture;
+                } else {
+                    inactive_texture_panel = texture;
+                }
+            }
+            _ => {
+
+            }
+
         }
     }
 
@@ -266,7 +316,12 @@ async fn main() {
 
         draw_texture(&active_texture_buttons.as_ref().unwrap(), wx + ww - active_texture_buttons.as_ref().unwrap().width() + 1., wy - 1., WHITE);
 
-        next_frame().await
+
+        draw_texture(&active_texture_panel.as_ref().unwrap(), wx + ww - active_texture_buttons.as_ref().unwrap().width() + 1., wy + 100., WHITE);
+
+        next_frame().await;
+
+        std:: thread ::sleep(Duration::from_millis(10));
     }
 
 
