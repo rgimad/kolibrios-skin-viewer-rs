@@ -1,10 +1,8 @@
 use std::env;
-use std::os::windows::process;
 use std::path::Path;
 use std::io::Cursor;
 use std::time::Duration;
 use byteorder::{LittleEndian, ReadBytesExt};
-use macroquad::miniquad::window::screen_size;
 use std::fs::File;
 use std::io::Read;
 use std::error::Error;
@@ -356,16 +354,4 @@ async fn main() {
         std::thread::sleep(Duration::from_millis(10));
     }
 
-
-    // loop {
-    //     clear_background(RED);
-
-    //     draw_line(40.0, 40.0, 100.0, 200.0, 15.0, BLUE);
-    //     draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 120.0, 60.0, GREEN);
-    //     draw_circle(screen_width() - 30.0, screen_height() - 30.0, 15.0, YELLOW);
-
-    //     draw_text("IT WORKS!", 20.0, 20.0, 30.0, DARKGRAY);
-
-    //     next_frame().await
-    // }
 }
