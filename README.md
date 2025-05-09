@@ -2,7 +2,11 @@
 `cargo build --release`
 
 ### Usage
-`kolibrios-skin-viewer-rs skin.skn`
+`kolibrios-skin-viewer-rs <skinfile>`
+
+For example:
+
+`"target/release/kolibrios-skin-viewer-rs" test_skins/default.skn`
 
 ### TODO
 - [ ] Kpacked skins support
