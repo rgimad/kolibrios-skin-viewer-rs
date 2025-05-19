@@ -264,7 +264,7 @@ async fn main() {
     };
 
     // println!("skin_obj = {:#X?} ", skin_obj);
-    //println!("skin_obj = {:X?} ", skin_obj);
+    // println!("skin_obj = {:X?} ", skin_obj);
 
     println!("len(bmps) = {}", skin_obj.bitmaps.len());
 
@@ -324,7 +324,10 @@ async fn main() {
         }
     }
 
-    let panel_width = active_bmp_panel.unwrap().width as usize*(ww as usize - active_texture_buttons.as_ref().unwrap().width() as usize - active_texture_left.as_ref().unwrap().width() as usize) + 2;
+    let panel_width = (ww as usize - active_texture_buttons.as_ref().unwrap().width() as usize - active_texture_left.as_ref().unwrap().width() as usize) + 2;
+
+    println!("active_bmp_panel = {:X?}, panel_width = {}\n", active_bmp_panel, panel_width);
+
     let rep = dup_image_horiz(&active_bmp_panel.unwrap().data, active_bmp_panel.unwrap().width as usize, active_bmp_panel.unwrap().height as usize, panel_width);
     let active_texture_panel = Some(Texture2D::from_rgba8(panel_width as u16, active_bmp_panel.unwrap().height as u16, &rep));
     let rep = dup_image_horiz(&inactive_bmp_panel.unwrap().data, inactive_bmp_panel.unwrap().width as usize, inactive_bmp_panel.unwrap().height as usize, panel_width);
