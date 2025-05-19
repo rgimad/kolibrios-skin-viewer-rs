@@ -8,6 +8,9 @@ use std::io::Read;
 use std::error::Error;
 use macroquad::prelude::*;
 
+mod unpacker;
+use unpacker::*;
+
 const SKIN_MAGIC: u32  = 0x4E494B53; // 'SKIN'
 const KPACK_MAGIC: u32 = 0x4B43504B; // 'KPACK'
 
@@ -75,17 +78,20 @@ fn read_skin_file(file_path: &Path) -> Result<Skin, Box<dyn Error>> {
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
 
-    let skin_data = &buffer[..];
+    let mut skin_data = &buffer[..];
 
     let mut cursor1 = Cursor::new(skin_data);
 
-    // TODO add kpacked files processing
-    // let magic = skin_data.read_u32::<LittleEndian>()?;
-    // if magic == KPACK_MAGIC {
-    //     skin_data = &unpack(skin_data)?;
-    // }
+    let mut magic = cursor1.read_u32::<LittleEndian>()?;
 
-    let magic = cursor1.read_u32::<LittleEndian>()?;
+    let unpacked_data;
+    if magic == KPACK_MAGIC {
+        unpacked_data = skin_unpack(skin_data)?;
+        skin_data = &unpacked_data[..];
+        cursor1 = Cursor::new(skin_data);
+        magic = cursor1.read_u32::<LittleEndian>()?;   
+    }
+
     if magic != SKIN_MAGIC {
         return Err("The uploaded file is not a skin!".into());
     }

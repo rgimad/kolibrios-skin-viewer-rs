@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 macroquad = "0.4"
 byteorder = "1"
+lzma-rs = {version = "0.3.0"}
